@@ -51,3 +51,10 @@
     font-size: small;
     margin: 40px auto auto auto;
 }
+
+.error-message {
+    display: flex;
+    justify-content: center;
+    color: red;
+    margin: 25px auto auto auto;
+}

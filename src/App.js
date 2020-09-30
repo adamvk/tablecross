@@ -12,6 +12,7 @@ const App = () => {
     const [startX, setStartX] = useState(null);
     const [startY, setStartY] = useState(null);
     const [tableLoaded, setTableLoaded] = useState(false);
+    const [errorMessage, setErrorMessage] = useState([false, null]);
 
     var inputRef = useRef(null);
 
@@ -48,16 +49,71 @@ const App = () => {
 
     const setVariable = (parameter, input) => {
         if (parameter === "sizeX") { 
-            setSizeX([...Array(parseInt(input)).keys()]);
+            if (Number.isInteger(parseInt(input)) && parseInt(input) >= 2) {
+                setSizeX([...Array(parseInt(input)).keys()]);
+                setErrorMessage([false, null]);
+            } else {
+                setErrorMessage([true, 1]);
+            };
         } else if (parameter === "sizeY") { 
-            setSizeY([...Array(parseInt(input)).keys()]);
+            if (Number.isInteger(parseInt(input)) && parseInt(input) >= 2) {
+                setSizeY([...Array(parseInt(input)).keys()]);
+                setErrorMessage([false, null]);
+            } else {
+                setErrorMessage([true, 1]);
+            };
         } else if (parameter === "startX") {
-            setStartX(parseInt(input));
-        } else if (parameter === "startY") { 
-            setStartY(parseInt(input));
-            setTableLoaded(true);
+            if (Number.isInteger(parseInt(input))) {
+                if (parseInt(input) < sizeX.length) {
+                    setStartX(parseInt(input));
+                    setErrorMessage([false, null]);
+                } else {
+                    setErrorMessage([true, 3]);
+                }
+            } else {
+                setErrorMessage([true, 2]);
+            };
+        } else if (parameter === "startY") {
+            if (Number.isInteger(parseInt(input))) {
+                if (parseInt(input) < sizeY.length) {
+                    setStartY(parseInt(input));
+                    setErrorMessage([false, null]);
+                    setTableLoaded(true);
+                } else {
+                    setErrorMessage([true, 3]);
+                }
+            } else {
+                setErrorMessage([true, 2]);
+            };
         };
         setInput("");
+    };
+
+    const displayErrorMessage = () => {
+        return(
+            <div className="error-message">
+                { errorMessage[1] === 1 &&
+                    <>
+                        Please enter a valid integer between 2 and 9.
+                    </>
+                }
+                { errorMessage[1] === 2 &&
+                    <>
+                        Please enter a valid integer.
+                    </>
+                }
+                { errorMessage[1] === 3 &&
+                    <>
+                        The start position needs to be on the table.
+                        { startX ?
+                            ` [0, ${sizeY.length-1}]`
+                        :
+                            ` [0, ${sizeX.length-1}]`
+                        }
+                    </>
+                }
+            </div>
+        );
     };
 
     return (
@@ -67,9 +123,14 @@ const App = () => {
                 TableCross
             </div>
             { !tableLoaded ?
-                <div className="page-container">
-                    { manageInputFields() }
-                </div>
+                <>
+                    <div className="page-container">
+                        { manageInputFields() }
+                    </div>
+                    { errorMessage &&
+                        displayErrorMessage()
+                    }
+                </>
             :
                 <Game
                     sizeX={sizeX}
